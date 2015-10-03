@@ -28,9 +28,7 @@ public class TweetListFragment extends ListFragment {
 
         setEmptyText(getString(R.string.empty));
 
-        if (savedInstanceState == null) {
             loadTweets(events.getTimeline());
-        }
     }
 
     @Override

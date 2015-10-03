@@ -5,26 +5,24 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.twitter.sdk.android.Twitter;
-import com.twitter.sdk.android.core.TwitterAuthConfig;
 import com.twitter.sdk.android.core.models.Tweet;
 import com.twitter.sdk.android.tweetui.Timeline;
 
-import io.fabric.sdk.android.Fabric;
-
 public class MainActivity extends AppCompatActivity implements TweetListFragment.Events {
 
-    // Note: Your consumer key and secret should be obfuscated in your source code before shipping.
-    private static final String TWITTER_KEY = TwitterSecret.getTwitterKey();
-    private static final String TWITTER_SECRET = TwitterSecret.getTwitterSecret();
-
+    private TweetLoader tweetLoader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        TwitterAuthConfig authConfig = new TwitterAuthConfig(TWITTER_KEY, TWITTER_SECRET);
-        Fabric.with(this, new Twitter(authConfig));
+        tweetLoader = new TweetLoader(this);
         setContentView(R.layout.activity_main);
+    }
+
+    @Override
+    protected void onDestroy() {
+        tweetLoader = null;
+        super.onDestroy();
     }
 
     @Override
@@ -51,6 +49,6 @@ public class MainActivity extends AppCompatActivity implements TweetListFragment
 
     @Override
     public Timeline<Tweet> getTimeline() {
-        return new TweetListFragment.EmptyTimeline();
+        return tweetLoader.getTimeline();
     }
 }
