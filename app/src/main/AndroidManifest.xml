@@ -3,6 +3,8 @@
           xmlns:android="http://schemas.android.com/apk/res/android"
     >
 
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
         android:allowBackup="false"
         android:fullBackupContent="false"
@@ -25,6 +27,4 @@
             android:value="8cdb34a854c1e10b3ac14706d0f31e40f80a9b36"
             />
     </application>
-
-    <uses-permission android:name="android.permission.INTERNET"/>
 </manifest>
