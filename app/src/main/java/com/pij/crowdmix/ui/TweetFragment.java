@@ -33,6 +33,7 @@ public class TweetFragment extends Fragment {
     TextView messageView;
     @Bind(R.id.button)
     View button;
+
     private Callback<Tweet> resultAnalyser = new Callback<Tweet>() {
         @Override
         public void success(Result<Tweet> ignored) {
@@ -73,6 +74,8 @@ public class TweetFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
+
+        setMessage(null);
     }
 
     /**
