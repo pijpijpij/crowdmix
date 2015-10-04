@@ -15,6 +15,7 @@ import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.TwitterSession;
 import com.twitter.sdk.android.core.identity.TwitterLoginButton;
 import com.twitter.sdk.android.core.models.Tweet;
+import com.twitter.sdk.android.core.services.StatusesService;
 
 import java.util.List;
 
@@ -99,16 +100,17 @@ public class MainActivity extends AppCompatActivity implements TweetListFragment
     }
 
     private void setSession(@Nullable TwitterSession newSession) {
-        twitterProxy.setSession(newSession);
+        StatusesService service = TwitterProxy.createLoggedInClient(newSession);
+        twitterProxy.setService(service);
         updateLoginPanel();
         updateListPanel();
         updateTweetPanel();
-        invalidateOptionsMenu();
+        //        invalidateOptionsMenu();
     }
 
     @Override
     public boolean isLoggedIn() {
-        return twitterProxy.isLoggedIn();
+        return twitterProxy.isConnected();
     }
 
     @Override
