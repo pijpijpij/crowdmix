@@ -1,6 +1,5 @@
 package com.pij.crowdmix;
 
-import com.pij.android.NoopCallback;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.models.Tweet;
@@ -33,7 +32,9 @@ public class TwitterProxyTest {
     @Mock
     private StatusesService mockService;
     @Mock
-    private Callback<List<Tweet>> mockCallback;
+    private Callback<List<Tweet>> mockListCallback;
+    @Mock
+    private Callback<Tweet> mockUpdateCallback;
 
     private TwitterProxy tested;
 
@@ -59,38 +60,37 @@ public class TwitterProxyTest {
     public void test_ServiceSetLoadTweets_CallsCallback() {
         tested.setService(mockService);
 
-        final NoopCallback<List<Tweet>> callback = new NoopCallback<>();
-        tested.load(callback);
+        tested.load(mockListCallback);
 
         verify(mockService).homeTimeline(eq(20), anyLong(), anyLong(), anyBoolean(), anyBoolean(), anyBoolean(),
-                                         anyBoolean(), eq(callback));
+                                         anyBoolean(), eq(mockListCallback));
     }
 
     @Test
     public void test_ServiceSetUpdate_CallsCallback() {
         tested.setService(mockService);
 
-        final NoopCallback<Tweet> callback = new NoopCallback<>();
-        tested.sendUpdate("ha!", callback);
+        tested.sendUpdate("ha!", mockUpdateCallback);
 
         verify(mockService).update(eq("ha!"), anyLong(), anyBoolean(), anyDouble(), anyDouble(), anyString(),
-                                   anyBoolean(), anyBoolean(), anyString(), eq(callback));
+                                   anyBoolean(), anyBoolean(), anyString(), eq(mockUpdateCallback));
     }
 
     @Test
     public void test_ServiceNotSetLoadTweets_CallsFailure() {
         tested.setService(null);
 
-        tested.load(mockCallback);
+        tested.load(mockListCallback);
 
-        verify(mockCallback).failure(any(TwitterException.class));
+        verify(mockListCallback).failure(any(TwitterException.class));
     }
 
+    @Test
     public void test_ServiceSetUpdate_CallsFailure() {
         tested.setService(null);
 
-        tested.sendUpdate("ha!", new NoopCallback<Tweet>());
+        tested.sendUpdate("ha!", mockUpdateCallback);
 
-        verify(mockCallback).failure(any(TwitterException.class));
+        verify(mockUpdateCallback).failure(any(TwitterException.class));
     }
 }
