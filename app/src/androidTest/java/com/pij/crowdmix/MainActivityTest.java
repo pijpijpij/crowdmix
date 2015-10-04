@@ -14,12 +14,12 @@ import org.junit.runner.RunWith;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.intent.Intents.intending;
 import static android.support.test.espresso.intent.matcher.IntentMatchers.isInternal;
 import static android.support.test.espresso.matcher.ViewMatchers.isCompletelyDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.isDescendantOfA;
-import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.isEnabled;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
@@ -47,48 +47,47 @@ public class MainActivityTest {
         return onView(allOf(withId(R.id.login), withText("Log in with Twitter")));
     }
 
-    public void test_Title_Correct() {
+    @Test
+    public void test_InitialScreen_RefreshTitlePresent() {
         onView(allOf(isDescendantOfA(withId(R.id.action_bar)), withText("Crowdmix"))).check(
                 matches(isCompletelyDisplayed()));
     }
 
-    public void test_Refresh_Present() {
+    @Test
+    public void test_InitialScreen_RefreshPresent() {
         onView(allOf(isDescendantOfA(withId(R.id.action_bar)), withText("Refresh"))).check(
                 matches(isCompletelyDisplayed()));
     }
 
-    public void test_Refresh_Disabled() {
+    @Test
+    public void test_InitialScreen_RefreshDisabled() {
         onView(allOf(isDescendantOfA(withId(R.id.action_bar)), withText("Refresh"))).check(matches(not(isEnabled())));
     }
 
-    public void test_LoginButton_Present() {
+    public void test_InitialScreen_LoginButtonPresent() {
         onLoginButton().check(matches(isCompletelyDisplayed()));
     }
 
-    //    public void test_EmptyText_Present() {
-    //        onView(allOf(isDescendantOfA(withId(R.id.fragment)), withText("There aren't any tweet."))).check(
-    //                matches(isCompletelyDisplayed()));
+    //    @Test
+    //    public void test_LoginButtonPressed_PopsUp() {
+    //        intending(not(isInternal())).respondWith(new Instrumentation.ActivityResult(0, null));
+    //
+    //        onLoginButton().perform(click());
     //    }
-
-    @Test
-    public void test_LoginButtonPressed_PopsUp() {
-        intending(not(isInternal())).respondWith(new Instrumentation.ActivityResult(0, null));
-
-        onLoginButton().perform(click());
-    }
 
     @Test
     public void test_AuthenticationFailed_LoginButtonVisible() {
         intending(not(isInternal())).respondWith(new Instrumentation.ActivityResult(Activity.RESULT_CANCELED, null));
 
-        onLoginButton().perform(click()).check(matches(isDisplayed()));
+        onLoginButton().perform(click()).check(matches(isCompletelyDisplayed()));
     }
 
     @Test
     public void test_AuthenticationOK_LoginButtonHidden() {
         intending(not(isInternal())).respondWith(createOKAuthenticationResult());
 
-        onLoginButton().perform(click()).check(matches(not(isDisplayed())));
+        onLoginButton().perform(click()).check(doesNotExist());
+        //        onLoginButton().perform(click()).check(matches(not(isDisplayed())));
     }
 
     @NonNull
