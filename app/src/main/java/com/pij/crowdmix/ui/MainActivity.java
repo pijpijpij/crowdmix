@@ -1,4 +1,4 @@
-package com.pij.crowdmix;
+package com.pij.crowdmix.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.pij.android.DelegatingCallback;
+import com.pij.crowdmix.R;
+import com.pij.crowdmix.TwitterProxy;
 import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;

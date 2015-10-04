@@ -1,4 +1,4 @@
-package com.pij.crowdmix;
+package com.pij.crowdmix.ui;
 
 import android.app.Activity;
 import android.app.Instrumentation;
@@ -7,6 +7,8 @@ import android.support.annotation.NonNull;
 import android.support.test.espresso.ViewInteraction;
 import android.support.test.espresso.intent.rule.IntentsTestRule;
 import android.support.test.runner.AndroidJUnit4;
+
+import com.pij.crowdmix.R;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -37,11 +39,6 @@ public class MainActivityTest {
      */
     @Rule
     public IntentsTestRule<MainActivity> activityRule = new IntentsTestRule<>(MainActivity.class);
-
-    //    @Before
-    //    public void stubAllExternalIntents() {
-    //        intending(not(isInternal())).respondWith(new Instrumentation.ActivityResult(Activity.RESULT_OK, null));
-    //    }
 
     private ViewInteraction onLoginButton() {
         return onView(allOf(withId(R.id.login), withText("Log in with Twitter")));

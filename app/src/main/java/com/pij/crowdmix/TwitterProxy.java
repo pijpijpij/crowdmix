@@ -3,6 +3,7 @@ package com.pij.crowdmix;
 import android.content.Context;
 import android.support.annotation.Nullable;
 
+import com.pij.crowdmix.config.TwitterSecret;
 import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.TwitterAuthConfig;
