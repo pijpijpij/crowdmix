@@ -13,14 +13,16 @@ import java.util.List;
 
 import io.fabric.sdk.android.Fabric;
 
-public class TweetLoader {
+class TwitterProxy {
 
     private static final String TWITTER_KEY = TwitterSecret.getTwitterKey();
     private static final String TWITTER_SECRET = TwitterSecret.getTwitterSecret();
 
     private TwitterApiClient client;
 
-    public TweetLoader(Context context) {
+    public TwitterProxy() {}
+
+    public static void initialise(Context context) {
         TwitterAuthConfig authConfig = new TwitterAuthConfig(TWITTER_KEY, TWITTER_SECRET);
         Fabric.with(context, new Twitter(authConfig));
     }
@@ -29,9 +31,19 @@ public class TweetLoader {
         client = session == null ? null : Twitter.getApiClient(session);
     }
 
+    public boolean isLoggedIn() {
+        return client != null;
+    }
+
     public void load(Callback<List<Tweet>> sink) {
-        if (client != null) {
+        if (isLoggedIn()) {
             client.getStatusesService().homeTimeline(20, null, null, null, null, true, null, sink);
+        }
+    }
+
+    public void sendUpdate(String message, Callback<Tweet> callback) {
+        if (isLoggedIn()) {
+            client.getStatusesService().update(message, null, null, null, null, null, null, null, null, callback);
         }
     }
 

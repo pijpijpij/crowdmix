@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Toast;
 
+import com.pij.android.DelegatingCallback;
 import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
@@ -20,7 +21,7 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements TweetListFragment.Events {
+public class MainActivity extends AppCompatActivity implements TweetListFragment.Events, TweetFragment.Events {
 
     @Bind(R.id.login)
     TwitterLoginButton login;
@@ -28,13 +29,15 @@ public class MainActivity extends AppCompatActivity implements TweetListFragment
     @Bind(R.id.login_panel)
     View loginPanel;
 
-    private TweetLoader tweetLoader;
-    private TwitterSession session;
+    @Bind(R.id.tweet)
+    View tweetPanel;
+
+    private TwitterProxy twitterProxy = new TwitterProxy();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        tweetLoader = new TweetLoader(this);
+        TwitterProxy.initialise(this);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
@@ -55,8 +58,7 @@ public class MainActivity extends AppCompatActivity implements TweetListFragment
 
     @Override
     protected void onDestroy() {
-        session = null;
-        tweetLoader = null;
+        twitterProxy = null;
         ButterKnife.unbind(this);
         super.onDestroy();
     }
@@ -74,31 +76,55 @@ public class MainActivity extends AppCompatActivity implements TweetListFragment
      * Beefy I know, but re-creating the fragment every time simplifies the API between activity and fragment.
      */
     private void updateListPanel() {
-        getSupportFragmentManager().beginTransaction().replace(R.id.tweet_list,
-                                                               TweetListFragment.newInstance()).commit();
+        if (isLoggedIn()) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.tweet_list,
+                                                                   TweetListFragment.newInstance()).commit();
+        }
     }
 
+    /**
+     * Hides the panel if there is no session.
+     */
+    private void updateTweetPanel() {
+        int tweetPanelVisibility = isLoggedIn() ? View.VISIBLE : View.GONE;
+        tweetPanel.setVisibility(tweetPanelVisibility);
+    }
+
+    /**
+     * Shows the panel if there is no session.
+     */
     private void updateLoginPanel() {
-        int loginPanelVisibility = (session == null) ? View.VISIBLE : View.GONE;
+        int loginPanelVisibility = isLoggedIn() ? View.GONE : View.VISIBLE;
         loginPanel.setVisibility(loginPanelVisibility);
     }
 
-    @Override
-    public TwitterSession getSession() {
-        return session;
-    }
-
     private void setSession(@Nullable TwitterSession newSession) {
-        session = newSession;
-        tweetLoader.setSession(session);
+        twitterProxy.setSession(newSession);
         updateLoginPanel();
         updateListPanel();
+        updateTweetPanel();
         invalidateOptionsMenu();
     }
 
     @Override
-    public void loadTweets(Callback<List<Tweet>> callback) {
-        tweetLoader.load(callback);
+    public boolean isLoggedIn() {
+        return twitterProxy.isLoggedIn();
+    }
 
+    @Override
+    public void loadTweets(Callback<List<Tweet>> callback) {
+        twitterProxy.load(callback);
+
+    }
+
+    @Override
+    public void tweet(String message, final Callback<Tweet> callback) {
+        twitterProxy.sendUpdate(message, new DelegatingCallback<Tweet>(callback) {
+            @Override
+            public void success(Result<Tweet> result) {
+                super.success(result);
+                updateListPanel();
+            }
+        });
     }
 }

@@ -12,9 +12,7 @@ import android.widget.Toast;
 
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
-import com.twitter.sdk.android.core.TwitterAuthToken;
 import com.twitter.sdk.android.core.TwitterException;
-import com.twitter.sdk.android.core.TwitterSession;
 import com.twitter.sdk.android.core.models.Tweet;
 import com.twitter.sdk.android.tweetui.FixedTweetTimeline;
 import com.twitter.sdk.android.tweetui.TweetTimelineListAdapter;
@@ -72,9 +70,8 @@ public class TweetListFragment extends ListFragment {
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
-        final TwitterSession session = events.getSession();
         final MenuItem refresh = menu.findItem(R.id.action_refresh);
-        refresh.setEnabled(session != null);
+        refresh.setEnabled(events.isLoggedIn());
         super.onPrepareOptionsMenu(menu);
     }
 
@@ -107,7 +104,7 @@ public class TweetListFragment extends ListFragment {
      */
     public interface Events {
 
-        TwitterSession getSession();
+        boolean isLoggedIn();
 
         void loadTweets(Callback<List<Tweet>> callback);
     }
@@ -117,9 +114,12 @@ public class TweetListFragment extends ListFragment {
      */
     public static class NoopEvents implements Events {
 
+        /**
+         * @return <code>false</code>
+         */
         @Override
-        public TwitterSession getSession() {
-            return new TwitterSession(new TwitterAuthToken(null, null), 0L, "Not logged in");
+        public boolean isLoggedIn() {
+            return false;
         }
 
         @Override
