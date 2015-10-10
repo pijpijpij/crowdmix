@@ -15,4 +15,7 @@ Place a class named `TwitterSecret` in package `com.pij.crowdmix.config` with th
         }
     }
     
-   
+    
+Also note that because of the way the Twitter logging API works, Espresso test inherit the login status of the previous 
+test thus mey of may not run against a logged-in application, when all Espresso tests are run together. 
+So they all check the app is **logged in**.

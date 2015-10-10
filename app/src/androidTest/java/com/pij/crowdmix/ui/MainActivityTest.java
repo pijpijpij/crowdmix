@@ -1,31 +1,42 @@
 package com.pij.crowdmix.ui;
 
-import android.app.Activity;
-import android.app.Instrumentation;
-import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.test.espresso.ViewInteraction;
-import android.support.test.espresso.intent.rule.IntentsTestRule;
+import android.support.test.espresso.DataInteraction;
+import android.support.test.espresso.Espresso;
+import android.support.test.espresso.PerformException;
+import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
+import android.view.View;
+import android.widget.EditText;
 
 import com.pij.crowdmix.R;
+import com.twitter.sdk.android.core.models.Tweet;
 
+import org.hamcrest.CoreMatchers;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Random;
+
+import static android.support.test.espresso.Espresso.onData;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.action.ViewActions.replaceText;
 import static android.support.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
-import static android.support.test.espresso.intent.Intents.intending;
-import static android.support.test.espresso.intent.matcher.IntentMatchers.isInternal;
+import static android.support.test.espresso.matcher.ViewMatchers.hasDescendant;
 import static android.support.test.espresso.matcher.ViewMatchers.isCompletelyDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.isDescendantOfA;
+import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.isEnabled;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
+import static java.lang.Math.max;
+import static java.lang.Thread.sleep;
 import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.not;
 
 /**
@@ -38,14 +49,45 @@ public class MainActivityTest {
      * Inits and release Espresso Intents before and after each test run.
      */
     @Rule
-    public IntentsTestRule<MainActivity> activityRule = new IntentsTestRule<>(MainActivity.class);
+    public ActivityTestRule<MainActivity> activityRule = new ActivityTestRule<>(MainActivity.class);
 
-    private ViewInteraction onLoginButton() {
-        return onView(allOf(withId(R.id.login), withText("Log in with Twitter")));
+    private String createRandomString(int maxLength) {
+        Random generator = new Random();
+        StringBuilder randomStringBuilder = new StringBuilder();
+        int randomLength = max(1, generator.nextInt(maxLength));
+        char tempChar;
+        for (int i = 0; i < randomLength; i++) {
+            tempChar = (char)(generator.nextInt('Z' - ' ') + ' ');
+            randomStringBuilder.append(tempChar);
+        }
+        return randomStringBuilder.toString();
+    }
+
+    @NonNull
+    private DataInteraction onTweetList() {return onData(instanceOf(Tweet.class));}
+
+    @Before
+    public void ensureLoggedIn() {
+        onView(allOf(withId(R.id.login), withText("Log in with Twitter"))).check(matches(not(isDisplayed())));
+    }
+
+    @Before
+    public void ensureNoKeyboard() {
+        Espresso.closeSoftKeyboard();
+    }
+
+    // Don't know a better way...
+    @Before
+    public void leaveTimeForTheDataToLoad() {
+        try {
+            sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
-    public void test_InitialScreen_RefreshTitlePresent() {
+    public void test_InitialScreen_TitlePresent() {
         onView(allOf(isDescendantOfA(withId(R.id.action_bar)), withText("Crowdmix"))).check(
                 matches(isCompletelyDisplayed()));
     }
@@ -57,44 +99,37 @@ public class MainActivityTest {
     }
 
     @Test
-    public void test_InitialScreen_RefreshDisabled() {
-        onView(allOf(isDescendantOfA(withId(R.id.action_bar)), withText("Refresh"))).check(matches(not(isEnabled())));
-    }
-
-    public void test_InitialScreen_LoginButtonPresent() {
-        onLoginButton().check(matches(isCompletelyDisplayed()));
-    }
-
-    //    @Test
-    //    public void test_LoginButtonPressed_PopsUp() {
-    //        intending(not(isInternal())).respondWith(new Instrumentation.ActivityResult(0, null));
-    //
-    //        onLoginButton().perform(click());
-    //    }
-
-    @Test
-    public void test_AuthenticationFailed_LoginButtonVisible() {
-        intending(not(isInternal())).respondWith(new Instrumentation.ActivityResult(Activity.RESULT_CANCELED, null));
-
-        onLoginButton().perform(click()).check(matches(isCompletelyDisplayed()));
+    public void test_InitialScreen_RefreshEnabled() {
+        onView(allOf(isDescendantOfA(withId(R.id.action_bar)), withText("Refresh"))).check(matches(isEnabled()));
     }
 
     @Test
-    public void test_AuthenticationOK_LoginButtonHidden() {
-        intending(not(isInternal())).respondWith(createOKAuthenticationResult());
-
-        onLoginButton().perform(click()).check(doesNotExist());
-        //        onLoginButton().perform(click()).check(matches(not(isDisplayed())));
+    public void test_InitialScreen__LoginButtonHidden() {
+        // Already done in precondition!
     }
 
-    @NonNull
-    private Instrumentation.ActivityResult createOKAuthenticationResult() {
-        final Intent data = new Intent();
-        data.putExtra("tk", "token");
-        data.putExtra("ts", "tokenSecret");
-        data.putExtra("screen_name", "screenName");
-        data.putExtra("user_id", 0L);
-        return new Instrumentation.ActivityResult(Activity.RESULT_OK, data);
+    @Test
+    public void test_InitialScreen__20tweetsPresent() {
+
+        onTweetList().atPosition(20 - 1).check(matches(isEnabled()));
     }
 
+    @Test(expected = PerformException.class)
+    public void test_InitialScreen_21tweetsNotPresent() {
+
+        onTweetList().atPosition(21 - 1).check(doesNotExist());
+    }
+
+    @Test
+    public void test_AddATWeet_IsShownImmediatly() {
+        final String message = createRandomString(10);
+        onTweetList().atPosition(0).check(matches(not(hasDescendant(withText(message)))));
+        onView(allOf(withId(R.id.message), CoreMatchers.<View>instanceOf(EditText.class))).perform(
+                replaceText(message));
+        onView(withText("Tweet!")).perform(click());
+
+        leaveTimeForTheDataToLoad();
+
+        onTweetList().atPosition(0).check(matches(hasDescendant(withText(message))));
+    }
 }
