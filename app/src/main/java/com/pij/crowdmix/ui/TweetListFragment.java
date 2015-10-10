@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.pij.android.CallbackValve;
 import com.pij.crowdmix.R;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
@@ -27,7 +28,7 @@ public class TweetListFragment extends ListFragment {
     private static final Events NOOP_EVENTS = new NoopEvents();
 
     private Events events = NOOP_EVENTS;
-    private TweetDisplayer displayer = new TweetDisplayer();
+    private CallbackValve<List<Tweet>> valve = new CallbackValve<>();
 
     public TweetListFragment() {
     }
@@ -43,7 +44,14 @@ public class TweetListFragment extends ListFragment {
 
         setEmptyText(getString(R.string.empty));
 
+        valve.setSpout(new TweetDisplayer());
         startLoadingTweets();
+    }
+
+    @Override
+    public void onDestroyView() {
+        valve.setSpout(null);
+        super.onDestroyView();
     }
 
     /**
@@ -88,7 +96,7 @@ public class TweetListFragment extends ListFragment {
     }
 
     private void startLoadingTweets() {
-        events.loadTweets(displayer);
+        events.loadTweets(valve);
     }
 
     private void display(List<Tweet> tweets) {
