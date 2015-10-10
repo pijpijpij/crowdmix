@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements TweetListFragment
             }
         });
 
-        setSession(savedInstanceState == null ? null : Twitter.getSessionManager().getActiveSession());
+        setSession(Twitter.getSessionManager().getActiveSession());
     }
 
     @Override
@@ -107,7 +107,6 @@ public class MainActivity extends AppCompatActivity implements TweetListFragment
         updateLoginPanel();
         updateListPanel();
         updateTweetPanel();
-        //        invalidateOptionsMenu();
     }
 
     @Override
