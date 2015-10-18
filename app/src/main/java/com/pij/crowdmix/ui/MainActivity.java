@@ -8,8 +8,11 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.pij.android.DelegatingCallback;
+import com.pij.android.Provider;
 import com.pij.crowdmix.R;
 import com.pij.crowdmix.TwitterProxy;
+import com.pij.crowdmix.list.TweetListFragment;
+import com.pij.crowdmix.list.TweetListPresenter;
 import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
@@ -19,23 +22,19 @@ import com.twitter.sdk.android.core.identity.TwitterLoginButton;
 import com.twitter.sdk.android.core.models.Tweet;
 import com.twitter.sdk.android.core.services.StatusesService;
 
-import java.util.List;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements TweetListFragment.Events, TweetFragment.Events {
+public class MainActivity extends AppCompatActivity implements Provider<TweetListPresenter>, TweetFragment.Events {
 
+    private final TwitterProxy twitterProxy = new TwitterProxy();
+    private final TweetListPresenter tweeterListPresenter = new TweetListPresenter(twitterProxy);
     @Bind(R.id.login)
     TwitterLoginButton login;
-
     @Bind(R.id.login_panel)
     View loginPanel;
-
     @Bind(R.id.tweet)
     View tweetPanel;
-
-    private TwitterProxy twitterProxy = new TwitterProxy();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +60,6 @@ public class MainActivity extends AppCompatActivity implements TweetListFragment
 
     @Override
     protected void onDestroy() {
-        twitterProxy = null;
         ButterKnife.unbind(this);
         super.onDestroy();
     }
@@ -80,8 +78,9 @@ public class MainActivity extends AppCompatActivity implements TweetListFragment
      */
     private void updateListPanel() {
         if (isLoggedIn()) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.tweet_list,
-                                                                   TweetListFragment.newInstance()).commit();
+            getSupportFragmentManager().beginTransaction()
+                                       .replace(R.id.tweet_list, TweetListFragment.newInstance())
+                                       .commit();
         }
     }
 
@@ -109,15 +108,9 @@ public class MainActivity extends AppCompatActivity implements TweetListFragment
         updateTweetPanel();
     }
 
-    @Override
-    public boolean isLoggedIn() {
+    @Deprecated
+    boolean isLoggedIn() {
         return twitterProxy.isConnected();
-    }
-
-    @Override
-    public void loadTweets(Callback<List<Tweet>> callback) {
-        twitterProxy.load(callback);
-
     }
 
     @Override
@@ -129,5 +122,10 @@ public class MainActivity extends AppCompatActivity implements TweetListFragment
                 updateListPanel();
             }
         });
+    }
+
+    @Override
+    public TweetListPresenter get() {
+        return tweeterListPresenter;
     }
 }

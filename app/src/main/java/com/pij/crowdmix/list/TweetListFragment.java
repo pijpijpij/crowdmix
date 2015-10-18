@@ -1,34 +1,27 @@
-package com.pij.crowdmix.ui;
+package com.pij.crowdmix.list;
 
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.pij.android.CallbackValve;
+import com.pij.android.Provider;
 import com.pij.crowdmix.R;
-import com.twitter.sdk.android.core.Callback;
-import com.twitter.sdk.android.core.Result;
-import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.models.Tweet;
 import com.twitter.sdk.android.tweetui.FixedTweetTimeline;
 import com.twitter.sdk.android.tweetui.TweetTimelineListAdapter;
 
 import java.util.List;
 
-import static com.pij.android.Utils.cast;
-
 public class TweetListFragment extends ListFragment {
 
-    private static final Events NOOP_EVENTS = new NoopEvents();
-
-    private Events events = NOOP_EVENTS;
-    private CallbackValve<List<Tweet>> valve = new CallbackValve<>();
+    private Provider<TweetListPresenter> provider;
+    private TweetListPresenter presenter;
+    private boolean loggedIn;
 
     public TweetListFragment() {
     }
@@ -44,13 +37,15 @@ public class TweetListFragment extends ListFragment {
 
         setEmptyText(getString(R.string.empty));
 
-        valve.setSpout(new TweetDisplayer());
+        presenter = provider.get();
+        presenter.setView(new ViewDelegate());
         startLoadingTweets();
     }
 
     @Override
     public void onDestroyView() {
-        valve.setSpout(null);
+        presenter.setView(null);
+        presenter = null;
         super.onDestroyView();
     }
 
@@ -58,9 +53,10 @@ public class TweetListFragment extends ListFragment {
      * Get access to the business layer.
      */
     @Override
+    @SuppressWarnings("unchecked")
     public void onAttach(Context context) {
         super.onAttach(context);
-        events = cast(context, Events.class);
+        provider = (Provider<TweetListPresenter>)context;
     }
 
     /**
@@ -68,7 +64,7 @@ public class TweetListFragment extends ListFragment {
      */
     @Override
     public void onDetach() {
-        events = NOOP_EVENTS;
+        provider = null;
         super.onDetach();
     }
 
@@ -80,7 +76,7 @@ public class TweetListFragment extends ListFragment {
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
         final MenuItem refresh = menu.findItem(R.id.action_refresh);
-        refresh.setEnabled(events.isLoggedIn());
+        refresh.setEnabled(loggedIn);
         super.onPrepareOptionsMenu(menu);
     }
 
@@ -96,59 +92,34 @@ public class TweetListFragment extends ListFragment {
     }
 
     private void startLoadingTweets() {
-        events.loadTweets(valve);
+        presenter.loadTweets();
     }
 
-    private void display(List<Tweet> tweets) {
-        final FixedTweetTimeline timeline = new FixedTweetTimeline.Builder().setTweets(tweets).build();
-        final TweetTimelineListAdapter adapter = new TweetTimelineListAdapter.Builder(getActivity()).setTimeline(
-                timeline).build();
+    private class ViewDelegate implements TweetListView {
 
-        setListAdapter(adapter);
-    }
-
-    /**
-     * A callback interface that all activities containing this fragment must implement. This mechanism allow the
-     * "injection" of a timeline into this fragment.
-     */
-    public interface Events {
-
-        boolean isLoggedIn();
-
-        void loadTweets(Callback<List<Tweet>> callback);
-    }
-
-    /**
-     * Utility class that provides an empty implementation.
-     */
-    public static class NoopEvents implements Events {
-
-        /**
-         * @return <code>false</code>
-         */
         @Override
-        public boolean isLoggedIn() {
-            return false;
+        public void setInProgress(boolean newValue) {
+            setListShown(!newValue);
         }
 
         @Override
-        public void loadTweets(
-                Callback<List<Tweet>> callback) {
-            // Does nothing.
-        }
-
-    }
-
-    private class TweetDisplayer extends Callback<List<Tweet>> {
-        @Override
-        public void success(Result<List<Tweet>> result) {
-            display(result.data);
-            Log.d("PJC", "Received " + result.data.size() + " tweets to display");
+        public void setLoggedIn(boolean newValue) {
+            loggedIn = newValue;
+            getActivity().invalidateOptionsMenu();
         }
 
         @Override
-        public void failure(TwitterException e) {
-            Toast.makeText(getActivity(), "Could not load Tweets: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        public void setTweets(List<Tweet> tweets) {
+            final FixedTweetTimeline timeline = new FixedTweetTimeline.Builder().setTweets(tweets).build();
+            final TweetTimelineListAdapter adapter = new TweetTimelineListAdapter.Builder(getActivity()).setTimeline(
+                    timeline).build();
+
+            setListAdapter(adapter);
+        }
+
+        @Override
+        public void setError(String cause) {
+            Toast.makeText(getActivity(), "Could not load Tweets: " + cause, Toast.LENGTH_SHORT).show();
         }
     }
 
