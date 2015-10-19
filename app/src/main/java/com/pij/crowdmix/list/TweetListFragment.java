@@ -9,7 +9,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.pij.android.Provider;
 import com.pij.crowdmix.R;
 import com.twitter.sdk.android.core.models.Tweet;
 import com.twitter.sdk.android.tweetui.FixedTweetTimeline;
@@ -17,9 +16,11 @@ import com.twitter.sdk.android.tweetui.TweetTimelineListAdapter;
 
 import java.util.List;
 
+import static com.pij.android.Utils.cast;
+
 public class TweetListFragment extends ListFragment {
 
-    private Provider<TweetListPresenter> provider;
+    private TweetListPresenterProvider provider;
     private TweetListPresenter presenter;
     private boolean loggedIn;
 
@@ -37,7 +38,7 @@ public class TweetListFragment extends ListFragment {
 
         setEmptyText(getString(R.string.empty));
 
-        presenter = provider.get();
+        presenter = provider.getTweetListPresenter();
         presenter.setView(new ViewDelegate());
         startLoadingTweets();
     }
@@ -53,14 +54,13 @@ public class TweetListFragment extends ListFragment {
      * Get access to the business layer.
      */
     @Override
-    @SuppressWarnings("unchecked")
     public void onAttach(Context context) {
         super.onAttach(context);
-        provider = (Provider<TweetListPresenter>)context;
+        provider = cast(context, TweetListPresenterProvider.class);
     }
 
     /**
-     * Reset the active events interface to the empty implementation.
+     * Reset the active events interface to null.
      */
     @Override
     public void onDetach() {

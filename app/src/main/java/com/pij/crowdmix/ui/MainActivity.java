@@ -8,11 +8,11 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.pij.android.DelegatingCallback;
-import com.pij.android.Provider;
 import com.pij.crowdmix.R;
 import com.pij.crowdmix.TwitterProxy;
 import com.pij.crowdmix.list.TweetListFragment;
 import com.pij.crowdmix.list.TweetListPresenter;
+import com.pij.crowdmix.list.TweetListPresenterProvider;
 import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
@@ -25,7 +25,7 @@ import com.twitter.sdk.android.core.services.StatusesService;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements Provider<TweetListPresenter>, TweetFragment.Events {
+public class MainActivity extends AppCompatActivity implements TweetListPresenterProvider, TweetFragment.Events {
 
     private final TwitterProxy twitterProxy = new TwitterProxy();
     private final TweetListPresenter tweeterListPresenter = new TweetListPresenter(twitterProxy);
@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements Provider<TweetLis
     }
 
     @Override
-    public TweetListPresenter get() {
+    public TweetListPresenter getTweetListPresenter() {
         return tweeterListPresenter;
     }
 }
