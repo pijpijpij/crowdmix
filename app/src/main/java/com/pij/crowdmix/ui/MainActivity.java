@@ -12,11 +12,10 @@ import com.pij.crowdmix.list.CachingTweetListPresenter;
 import com.pij.crowdmix.list.SimpleTweetListPresenter;
 import com.pij.crowdmix.list.TweetListFragment;
 import com.pij.crowdmix.list.TweetListPresenter;
-import com.pij.crowdmix.list.TweetListPresenterProvider;
 import com.pij.crowdmix.login.LoginPresenter;
 import com.pij.crowdmix.login.LoginView;
+import com.pij.crowdmix.update.SimpleTweetUpdatePresenter;
 import com.pij.crowdmix.update.TweetUpdatePresenter;
-import com.pij.crowdmix.update.TweetUpdatePresenterProvider;
 import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.identity.TwitterLoginButton;
 
@@ -24,12 +23,12 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity
-        implements TweetListPresenterProvider, TweetUpdatePresenterProvider {
+        implements TweetListPresenter.Provider, TweetUpdatePresenter.Provider {
 
     private final TwitterProxy twitterProxy = new TwitterProxy();
     private final TweetListPresenter tweeterListPresenter = new CachingTweetListPresenter(
             new SimpleTweetListPresenter(twitterProxy));
-    private final TweetUpdatePresenter tweeterUpdatePresenter = new TweetUpdatePresenter(twitterProxy);
+    private final SimpleTweetUpdatePresenter tweeterUpdatePresenter = new SimpleTweetUpdatePresenter(twitterProxy);
     private final LoginPresenter loginPresenter = new LoginPresenter(twitterProxy);
 
     @Bind(R.id.login)

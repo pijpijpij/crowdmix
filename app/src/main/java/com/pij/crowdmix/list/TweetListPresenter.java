@@ -8,4 +8,9 @@ public interface TweetListPresenter {
     void setView(TweetListView newValue);
 
     void loadTweets();
+
+    interface Provider {
+
+        TweetListPresenter getTweetListPresenter();
+    }
 }

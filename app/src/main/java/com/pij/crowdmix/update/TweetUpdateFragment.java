@@ -32,9 +32,8 @@ public class TweetUpdateFragment extends Fragment {
 
     private String message;
 
-    private TweetUpdatePresenterProvider provider;
+    private TweetUpdatePresenter.Provider provider;
     private TweetUpdatePresenter presenter;
-    private boolean loggedIn;
 
     public TweetUpdateFragment() {
     }
@@ -49,7 +48,7 @@ public class TweetUpdateFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        provider = cast(context, TweetUpdatePresenterProvider.class);
+        provider = cast(context, TweetUpdatePresenter.Provider.class);
     }
 
     @Override
@@ -111,8 +110,7 @@ public class TweetUpdateFragment extends Fragment {
 
         @Override
         public void setLoggedIn(boolean newValue) {
-            loggedIn = newValue;
-            button.setEnabled(isMessageValid());
+            button.setEnabled(newValue && isMessageValid());
         }
 
         @Override

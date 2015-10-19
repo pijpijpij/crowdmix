@@ -20,7 +20,7 @@ import static com.pij.android.Utils.cast;
 
 public class TweetListFragment extends ListFragment {
 
-    private TweetListPresenterProvider provider;
+    private TweetListPresenter.Provider provider;
     private TweetListPresenter presenter;
     private boolean loggedIn;
 
@@ -56,7 +56,7 @@ public class TweetListFragment extends ListFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        provider = cast(context, TweetListPresenterProvider.class);
+        provider = cast(context, TweetListPresenter.Provider.class);
     }
 
     /**

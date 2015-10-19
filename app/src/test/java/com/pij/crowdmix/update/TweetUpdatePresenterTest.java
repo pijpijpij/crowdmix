@@ -30,21 +30,20 @@ import static org.mockito.Mockito.when;
  * @author Pierrejean on 18/10/2015.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class TweetUpdatePresenterTest {
+public abstract class TweetUpdatePresenterTest {
 
+    @Mock
+    protected TwitterProxy mockProxy;
+    @Mock
+    protected TweetUpdateView mockView;
     @Captor
     ArgumentCaptor<List<Tweet>> tweets;
-    @Mock
-    private TwitterProxy mockProxy;
-    @Mock
-    private TweetUpdateView mockView;
 
     @NonNull
-    private TweetUpdatePresenter createDefaultSut() {
-        TweetUpdatePresenter tested = new TweetUpdatePresenter(mockProxy);
-        tested.setView(mockView);
-        return tested;
-    }
+    protected abstract TweetUpdatePresenter createDefaultSut();
+
+    @NonNull
+    protected abstract TweetUpdatePresenter createViewLessSut();
 
     @NonNull
     private Answer<Tweet> createGoodAnswer(final Tweet tweet) {
@@ -71,15 +70,9 @@ public class TweetUpdatePresenterTest {
     }
 
 
-    @Test(expected = NullPointerException.class)
-    public void test_NullProxy_Throws() {
-        //noinspection ConstantConditions
-        new TweetUpdatePresenter(null);
-    }
-
     @Test
     public void test_setView_UpdatesLoginStateOnView() {
-        TweetUpdatePresenter tested = new TweetUpdatePresenter(mockProxy);
+        TweetUpdatePresenter tested = createViewLessSut();
         when(mockProxy.isConnected()).thenReturn(true);
 
         tested.setView(mockView);
@@ -90,7 +83,7 @@ public class TweetUpdatePresenterTest {
     @Test
     @SuppressWarnings("unchecked")
     public void test_update_CallsTwitter() {
-        TweetUpdatePresenter tested = new TweetUpdatePresenter(mockProxy);
+        TweetUpdatePresenter tested = createViewLessSut();
 
         tested.tweet("Ha!");
 
