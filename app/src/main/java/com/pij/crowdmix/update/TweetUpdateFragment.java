@@ -1,9 +1,8 @@
-package com.pij.crowdmix.ui;
+package com.pij.crowdmix.update;
 
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,10 +10,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.pij.crowdmix.R;
-import com.twitter.sdk.android.core.Callback;
-import com.twitter.sdk.android.core.Result;
-import com.twitter.sdk.android.core.TwitterException;
-import com.twitter.sdk.android.core.models.Tweet;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -27,33 +22,25 @@ import static com.pij.android.Utils.cast;
 import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 import static org.apache.commons.lang3.StringUtils.stripToNull;
 
-public class TweetFragment extends Fragment {
+public class TweetUpdateFragment extends Fragment {
 
     @Bind(R.id.message)
     TextView messageView;
+
     @Bind(R.id.button)
     View button;
 
-    private Callback<Tweet> resultAnalyser = new Callback<Tweet>() {
-        @Override
-        public void success(Result<Tweet> ignored) {
-            messageView.setText(null);
-        }
-
-        @Override
-        public void failure(TwitterException e) {
-            Log.d(getClass().getSimpleName(), "Failed to Tweet", e);
-            Toast.makeText(getActivity(), "Failed to Tweet: " + e.getMessage(), Toast.LENGTH_LONG).show();
-        }
-    };
-    private Events events;
     private String message;
 
-    public TweetFragment() {
+    private TweetUpdatePresenterProvider provider;
+    private TweetUpdatePresenter presenter;
+    private boolean loggedIn;
+
+    public TweetUpdateFragment() {
     }
 
-    public static TweetFragment newInstance() {
-        return new TweetFragment();
+    public static TweetUpdateFragment newInstance() {
+        return new TweetUpdateFragment();
     }
 
     /**
@@ -62,7 +49,7 @@ public class TweetFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        events = cast(context, Events.class);
+        provider = cast(context, TweetUpdatePresenterProvider.class);
     }
 
     @Override
@@ -75,7 +62,16 @@ public class TweetFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
 
+        presenter = provider.getTweetUpdatePresenter();
+        presenter.setView(new ViewDelegate());
         setMessage(null);
+    }
+
+    @Override
+    public void onDestroyView() {
+        presenter.setView(null);
+        presenter = null;
+        super.onDestroyView();
     }
 
     /**
@@ -83,7 +79,7 @@ public class TweetFragment extends Fragment {
      */
     @Override
     public void onDetach() {
-        events = null;
+        provider = null;
         super.onDetach();
     }
 
@@ -93,21 +89,40 @@ public class TweetFragment extends Fragment {
     @OnTextChanged(R.id.message)
     void setMessage(CharSequence newValue) {
         message = stripToNull(defaultIfEmpty(newValue, StringUtils.EMPTY).toString());
-        button.setEnabled(message != null);
+        button.setEnabled(isMessageValid());
+    }
+
+    private boolean isMessageValid() {
+        return message != null;
     }
 
     @OnClick(R.id.button)
     void postTweet() {
-        events.tweet(message, resultAnalyser);
+        presenter.tweet(message);
     }
 
-    /**
-     * A callback interface that all activities containing this fragment must implement. This mechanism allow the
-     * "injection" of a tweeting object into this fragment.
-     */
-    public interface Events {
+    private class ViewDelegate implements TweetUpdateView {
 
-        void tweet(String message, Callback<Tweet> callback);
+        @Override
+        public void setInProgress(boolean newValue) {
+            if (newValue) button.setEnabled(false);
+            else button.setEnabled(isMessageValid());
+        }
+
+        @Override
+        public void setLoggedIn(boolean newValue) {
+            loggedIn = newValue;
+            button.setEnabled(isMessageValid());
+        }
+
+        @Override
+        public void setUpdate(String message) {
+            messageView.setText(message);
+        }
+
+        @Override
+        public void setError(String cause) {
+            Toast.makeText(getActivity(), "Failed to Tweet: " + cause, Toast.LENGTH_LONG).show();
+        }
     }
-
 }

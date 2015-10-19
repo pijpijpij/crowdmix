@@ -13,6 +13,8 @@ import com.pij.crowdmix.TwitterProxy;
 import com.pij.crowdmix.list.TweetListFragment;
 import com.pij.crowdmix.list.TweetListPresenter;
 import com.pij.crowdmix.list.TweetListPresenterProvider;
+import com.pij.crowdmix.update.TweetUpdatePresenter;
+import com.pij.crowdmix.update.TweetUpdatePresenterProvider;
 import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
@@ -25,10 +27,12 @@ import com.twitter.sdk.android.core.services.StatusesService;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements TweetListPresenterProvider, TweetFragment.Events {
+public class MainActivity extends AppCompatActivity
+        implements TweetListPresenterProvider, TweetUpdatePresenterProvider {
 
     private final TwitterProxy twitterProxy = new TwitterProxy();
     private final TweetListPresenter tweeterListPresenter = new TweetListPresenter(twitterProxy);
+    private final TweetUpdatePresenter tweeterUpdatePresenter = new TweetUpdatePresenter(twitterProxy);
     @Bind(R.id.login)
     TwitterLoginButton login;
     @Bind(R.id.login_panel)
@@ -113,7 +117,6 @@ public class MainActivity extends AppCompatActivity implements TweetListPresente
         return twitterProxy.isConnected();
     }
 
-    @Override
     public void tweet(String message, final Callback<Tweet> callback) {
         twitterProxy.sendUpdate(message, new DelegatingCallback<Tweet>(callback) {
             @Override
@@ -127,5 +130,10 @@ public class MainActivity extends AppCompatActivity implements TweetListPresente
     @Override
     public TweetListPresenter getTweetListPresenter() {
         return tweeterListPresenter;
+    }
+
+    @Override
+    public TweetUpdatePresenter getTweetUpdatePresenter() {
+        return tweeterUpdatePresenter;
     }
 }

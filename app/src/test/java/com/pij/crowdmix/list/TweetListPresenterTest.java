@@ -20,7 +20,6 @@ import org.mockito.stubbing.Answer;
 import java.util.Collections;
 import java.util.List;
 
-import static java.util.Collections.emptyList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
@@ -49,6 +48,12 @@ public class TweetListPresenterTest {
         return tested;
     }
 
+    @SuppressWarnings("unchecked")
+    private void createSingleTweetAnswer(Tweet tweet) {
+        final List<Tweet> emptyList = Collections.singletonList(tweet);
+        doAnswer(createGoodAnswer(emptyList)).when(mockProxy).load(any(Callback.class));
+    }
+
     @NonNull
     private Answer<List<Tweet>> createGoodAnswer(final List<Tweet> tweets) {
         return new Answer<List<Tweet>>() {
@@ -61,13 +66,19 @@ public class TweetListPresenterTest {
         };
     }
 
+    @SuppressWarnings("unchecked")
+    private void createBadAnswer(String error) {
+        final TwitterException exception = new TwitterException(error);
+        doAnswer(createBadAnswer(exception)).when(mockProxy).load(any(Callback.class));
+    }
+
     @NonNull
-    private Answer<List<Tweet>> createBadAnswer(final String message) {
+    private Answer<List<Tweet>> createBadAnswer(final TwitterException exception) {
         return new Answer<List<Tweet>>() {
             @Override
             @SuppressWarnings("unchecked")
             public List<Tweet> answer(InvocationOnMock invocationOnMock) throws Throwable {
-                ((Callback<List<Tweet>>)invocationOnMock.getArguments()[0]).failure(new TwitterException(message));
+                ((Callback<List<Tweet>>)invocationOnMock.getArguments()[0]).failure(exception);
                 return Collections.emptyList();
             }
         };
@@ -110,11 +121,17 @@ public class TweetListPresenterTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
+    public void test_loadTweetsWithoutView_DoesNotThrow() {
+        TweetListPresenter tested = createDefaultSut();
+        tested.setView(null);
+
+        tested.loadTweets();
+    }
+
+    @Test
     public void test_TweetsLoaded_SetsTweetsOnView() {
         TweetListPresenter tested = createDefaultSut();
-        final List<Tweet> emptyList = Collections.singletonList(mock(Tweet.class));
-        doAnswer(createGoodAnswer(emptyList)).when(mockProxy).load(any(Callback.class));
+        createSingleTweetAnswer(mock(Tweet.class));
 
         tested.loadTweets();
 
@@ -123,11 +140,9 @@ public class TweetListPresenterTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void test_TweetsLoaded_ResetsInProgress() {
         TweetListPresenter tested = createDefaultSut();
-        final List<Tweet> emptyList = emptyList();
-        doAnswer(createGoodAnswer(emptyList)).when(mockProxy).load(any(Callback.class));
+        createSingleTweetAnswer(mock(Tweet.class));
 
         tested.loadTweets();
 
@@ -136,10 +151,18 @@ public class TweetListPresenterTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
+    public void test_TweetsLoadedWithoutView_DoesNotThrow() {
+        TweetListPresenter tested = createDefaultSut();
+        tested.setView(null);
+        createSingleTweetAnswer(mock(Tweet.class));
+
+        tested.loadTweets();
+    }
+
+    @Test
     public void test_TweetsFailToLoad_SetsMessageOnView() {
         TweetListPresenter tested = createDefaultSut();
-        doAnswer(createBadAnswer("Ha!")).when(mockProxy).load(any(Callback.class));
+        createBadAnswer("Ha!");
 
         tested.loadTweets();
 
@@ -147,15 +170,23 @@ public class TweetListPresenterTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void test_TweetsFailToLoad_ResetsInProgress() {
         TweetListPresenter tested = createDefaultSut();
-        doAnswer(createBadAnswer("Ha!")).when(mockProxy).load(any(Callback.class));
+        createBadAnswer("Ha!");
 
         tested.loadTweets();
 
         verify(mockView).setInProgress(true);
         verify(mockView).setInProgress(false);
+    }
+
+    @Test
+    public void test_TweetsFailToLoadWithoutView_DoesNotThrow() {
+        TweetListPresenter tested = createDefaultSut();
+        tested.setView(null);
+        createBadAnswer("H1!");
+
+        tested.loadTweets();
     }
 
 }
