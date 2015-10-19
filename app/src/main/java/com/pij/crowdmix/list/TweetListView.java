@@ -9,6 +9,8 @@ import java.util.List;
  */
 public interface TweetListView {
 
+    Noop NOOP_VIEW = new TweetListView.Noop();
+
     void setInProgress(boolean newValue);
 
     void setLoggedIn(boolean newValue);
@@ -35,4 +37,5 @@ public interface TweetListView {
         @Override
         public void setError(String ignored) { }
     }
+
 }

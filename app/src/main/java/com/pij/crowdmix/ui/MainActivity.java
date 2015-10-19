@@ -8,6 +8,8 @@ import android.widget.Toast;
 
 import com.pij.crowdmix.R;
 import com.pij.crowdmix.TwitterProxy;
+import com.pij.crowdmix.list.CachingTweetListPresenter;
+import com.pij.crowdmix.list.SimpleTweetListPresenter;
 import com.pij.crowdmix.list.TweetListFragment;
 import com.pij.crowdmix.list.TweetListPresenter;
 import com.pij.crowdmix.list.TweetListPresenterProvider;
@@ -25,9 +27,11 @@ public class MainActivity extends AppCompatActivity
         implements TweetListPresenterProvider, TweetUpdatePresenterProvider {
 
     private final TwitterProxy twitterProxy = new TwitterProxy();
-    private final TweetListPresenter tweeterListPresenter = new TweetListPresenter(twitterProxy);
+    private final TweetListPresenter tweeterListPresenter = new CachingTweetListPresenter(
+            new SimpleTweetListPresenter(twitterProxy));
     private final TweetUpdatePresenter tweeterUpdatePresenter = new TweetUpdatePresenter(twitterProxy);
     private final LoginPresenter loginPresenter = new LoginPresenter(twitterProxy);
+
     @Bind(R.id.login)
     TwitterLoginButton login;
     @Bind(R.id.login_panel)

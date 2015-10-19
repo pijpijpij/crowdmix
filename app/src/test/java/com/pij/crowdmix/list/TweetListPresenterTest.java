@@ -32,21 +32,20 @@ import static org.mockito.Mockito.when;
  * @author Pierrejean on 18/10/2015.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class TweetListPresenterTest {
+public abstract class TweetListPresenterTest {
 
+    @Mock
+    protected TwitterProxy mockProxy;
+    @Mock
+    protected TweetListView mockView;
     @Captor
     ArgumentCaptor<List<Tweet>> tweets;
-    @Mock
-    private TwitterProxy mockProxy;
-    @Mock
-    private TweetListView mockView;
 
     @NonNull
-    private TweetListPresenter createDefaultSut() {
-        TweetListPresenter tested = new TweetListPresenter(mockProxy);
-        tested.setView(mockView);
-        return tested;
-    }
+    protected abstract TweetListPresenter createDefaultSut();
+
+    @NonNull
+    protected abstract TweetListPresenter createViewLessSut();
 
     @SuppressWarnings("unchecked")
     private void createSingleTweetAnswer(Tweet tweet) {
@@ -85,15 +84,9 @@ public class TweetListPresenterTest {
     }
 
 
-    @Test(expected = NullPointerException.class)
-    public void test_NullProxy_Throws() {
-        //noinspection ConstantConditions
-        new TweetListPresenter(null);
-    }
-
     @Test
     public void test_setView_UpdatesLoginStateOnView() {
-        TweetListPresenter tested = new TweetListPresenter(mockProxy);
+        TweetListPresenter tested = createViewLessSut();
         when(mockProxy.isConnected()).thenReturn(true);
 
         tested.setView(mockView);
@@ -104,7 +97,7 @@ public class TweetListPresenterTest {
     @Test
     @SuppressWarnings("unchecked")
     public void test_loadTweets_CallsTwitter() {
-        TweetListPresenter tested = new TweetListPresenter(mockProxy);
+        TweetListPresenter tested = createViewLessSut();
 
         tested.loadTweets();
 
