@@ -11,6 +11,7 @@ import com.twitter.sdk.android.core.models.Tweet;
 import java.util.List;
 
 import static com.pij.crowdmix.list.TweetListView.NOOP_VIEW;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.Validate.notNull;
 
 /**
@@ -30,7 +31,7 @@ public class SimpleTweetListPresenter implements TweetListPresenter {
 
     @Override
     public void setView(TweetListView newValue) {
-        view = newValue == null ? NOOP_VIEW : newValue;
+        view = defaultIfNull(newValue, NOOP_VIEW);
         view.setLoggedIn(tweeter.isConnected());
     }
 

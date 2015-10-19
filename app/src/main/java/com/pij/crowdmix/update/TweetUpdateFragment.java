@@ -92,7 +92,7 @@ public class TweetUpdateFragment extends Fragment {
     }
 
     private boolean isMessageValid() {
-        return message != null;
+        return !StringUtils.isBlank(message);
     }
 
     @OnClick(R.id.button)

@@ -8,11 +8,11 @@ import com.twitter.sdk.android.core.Result;
 import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.models.Tweet;
 
+import static com.pij.crowdmix.update.TweetUpdateView.NOOP_VIEW;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.Validate.notNull;
 
 public class SimpleTweetUpdatePresenter implements TweetUpdatePresenter {
-
-    private final static TweetUpdateView.Noop NOOP_VIEW = new TweetUpdateView.Noop();
 
     private final TwitterProxy tweeter;
     private final PresenterDelegate delegate;
@@ -26,7 +26,7 @@ public class SimpleTweetUpdatePresenter implements TweetUpdatePresenter {
 
     @Override
     public void setView(TweetUpdateView newValue) {
-        view = newValue == null ? NOOP_VIEW : newValue;
+        view = defaultIfNull(newValue, NOOP_VIEW);
         view.setLoggedIn(tweeter.isConnected());
     }
 

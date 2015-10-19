@@ -5,6 +5,8 @@ package com.pij.crowdmix.update;
  */
 public interface TweetUpdateView {
 
+    Noop NOOP_VIEW = new Noop();
+
     void setInProgress(boolean newValue);
 
     void setLoggedIn(boolean newValue);
@@ -31,4 +33,5 @@ public interface TweetUpdateView {
         @Override
         public void setError(String ignored) { }
     }
+
 }

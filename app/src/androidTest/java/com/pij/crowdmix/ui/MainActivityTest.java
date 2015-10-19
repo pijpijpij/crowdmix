@@ -34,7 +34,6 @@ import static android.support.test.espresso.matcher.ViewMatchers.isEnabled;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static java.lang.Math.max;
-import static java.lang.Thread.sleep;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.not;
@@ -46,7 +45,7 @@ import static org.hamcrest.CoreMatchers.not;
 public class MainActivityTest {
 
     /**
-     * Inits and release Espresso Intents before and after each test run.
+     * Initialises and release Espresso Intents before and after each test run.
      */
     @Rule
     public ActivityTestRule<MainActivity> activityRule = new ActivityTestRule<>(MainActivity.class);
@@ -74,16 +73,6 @@ public class MainActivityTest {
     @Before
     public void ensureNoKeyboard() {
         Espresso.closeSoftKeyboard();
-    }
-
-    // Don't know a better way...
-    @Before
-    public void leaveTimeForTheDataToLoad() {
-        try {
-            sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     @Test
@@ -127,8 +116,6 @@ public class MainActivityTest {
         onView(allOf(withId(R.id.message), CoreMatchers.<View>instanceOf(EditText.class))).perform(
                 replaceText(message));
         onView(withText("Tweet!")).perform(click());
-
-        leaveTimeForTheDataToLoad();
 
         onTweetList().atPosition(0).check(matches(hasDescendant(withText(message))));
     }

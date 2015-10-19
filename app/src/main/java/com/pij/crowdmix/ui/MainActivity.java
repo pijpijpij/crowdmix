@@ -6,7 +6,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Toast;
 
+import com.pij.android.NoopCallback;
+import com.pij.crowdmix.ConcreteTwitterProxy;
 import com.pij.crowdmix.R;
+import com.pij.crowdmix.StoringTwitterProxy;
 import com.pij.crowdmix.TwitterProxy;
 import com.pij.crowdmix.list.CachingTweetListPresenter;
 import com.pij.crowdmix.list.SimpleTweetListPresenter;
@@ -17,6 +20,7 @@ import com.pij.crowdmix.login.LoginView;
 import com.pij.crowdmix.update.SimpleTweetUpdatePresenter;
 import com.pij.crowdmix.update.TweetUpdatePresenter;
 import com.twitter.sdk.android.Twitter;
+import com.twitter.sdk.android.core.TwitterSession;
 import com.twitter.sdk.android.core.identity.TwitterLoginButton;
 
 import butterknife.Bind;
@@ -25,11 +29,9 @@ import butterknife.ButterKnife;
 public class MainActivity extends AppCompatActivity
         implements TweetListPresenter.Provider, TweetUpdatePresenter.Provider {
 
-    private final TwitterProxy twitterProxy = new TwitterProxy();
-    private final TweetListPresenter tweeterListPresenter = new CachingTweetListPresenter(
-            new SimpleTweetListPresenter(twitterProxy));
-    private final SimpleTweetUpdatePresenter tweeterUpdatePresenter = new SimpleTweetUpdatePresenter(twitterProxy);
-    private final LoginPresenter loginPresenter = new LoginPresenter(twitterProxy);
+    private final TweetListPresenter tweeterListPresenter;
+    private final TweetUpdatePresenter tweeterUpdatePresenter;
+    private final LoginPresenter loginPresenter;
 
     @Bind(R.id.login)
     TwitterLoginButton login;
@@ -38,10 +40,20 @@ public class MainActivity extends AppCompatActivity
     @Bind(R.id.tweet)
     View tweetPanel;
 
+    public MainActivity() {
+        ConcreteTwitterProxy concreteTwitterProxy = new ConcreteTwitterProxy();
+        CachingTweetListPresenter cachingTweetListPresenter = new CachingTweetListPresenter(
+                new SimpleTweetListPresenter(concreteTwitterProxy));
+        tweeterListPresenter = cachingTweetListPresenter;
+        TwitterProxy twitterProxy = new StoringTwitterProxy(concreteTwitterProxy, cachingTweetListPresenter);
+        tweeterUpdatePresenter = new SimpleTweetUpdatePresenter(twitterProxy);
+        loginPresenter = new LoginPresenter(twitterProxy);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        TwitterProxy.initialise(this);
+        ConcreteTwitterProxy.initialise(this);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
@@ -53,6 +65,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         loginPresenter.setView(null);
+        login.setCallback(new NoopCallback<TwitterSession>());
         ButterKnife.unbind(this);
         super.onDestroy();
     }

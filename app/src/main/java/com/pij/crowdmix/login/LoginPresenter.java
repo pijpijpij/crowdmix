@@ -8,14 +8,14 @@ import com.twitter.sdk.android.core.Result;
 import com.twitter.sdk.android.core.TwitterException;
 import com.twitter.sdk.android.core.TwitterSession;
 
+import static com.pij.crowdmix.login.LoginView.NOOP_VIEW;
+import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.Validate.notNull;
 
 /**
  * @author Pierrejean on 19/10/2015.
  */
 public class LoginPresenter extends Callback<TwitterSession> {
-
-    private final static LoginView NOOP_VIEW = new LoginView.Noop();
 
     private final TwitterProxy tweeter;
     private LoginView view;
@@ -31,7 +31,7 @@ public class LoginPresenter extends Callback<TwitterSession> {
     }
 
     public void setView(LoginView newValue) {
-        view = newValue == null ? NOOP_VIEW : newValue;
+        view = defaultIfNull(newValue, NOOP_VIEW);
         view.setLoggedIn(tweeter.isConnected());
     }
 
