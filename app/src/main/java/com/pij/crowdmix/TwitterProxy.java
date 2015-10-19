@@ -33,11 +33,16 @@ public class TwitterProxy {
         Fabric.with(context, new Twitter(authConfig));
     }
 
-    public static StatusesService createLoggedInClient(TwitterSession session) {
-        return session == null ? null : Twitter.getApiClient(session).getStatusesService();
+    public void setSession(@Nullable TwitterSession newValue) {
+        StatusesService service = newValue == null ? null : Twitter.getApiClient(newValue).getStatusesService();
+        setService(service);
     }
 
-    public void setService(@Nullable StatusesService service) {
+    /**
+     * Package access so tests can bypass the transformation of session into service, as this the involve real Twitter
+     * API. Powermock could have done the trick, but that's enough for the day.
+     */
+    void setService(@Nullable StatusesService service) {
         this.service = service;
     }
 
