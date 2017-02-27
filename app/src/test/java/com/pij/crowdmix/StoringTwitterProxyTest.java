@@ -4,8 +4,11 @@ import android.support.annotation.NonNull;
 
 import com.twitter.sdk.android.core.models.Tweet;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -16,8 +19,11 @@ import static org.mockito.Mockito.verify;
  */
 public class StoringTwitterProxyTest extends TwitterProxyTest {
 
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
+
     @Mock
-    private StoringTwitterProxy.TweetStore mockTweetStore;
+    private TweetStore mockTweetStore;
 
     @NonNull
     @Override
@@ -26,7 +32,7 @@ public class StoringTwitterProxyTest extends TwitterProxyTest {
     }
 
     @Test
-    public void test_successfullSendUpdate_storesTheTweet() {
+    public void test_successfulSendUpdate_storesTheTweet() {
         StoringTwitterProxy tested = createDefaultSut();
         tested.setService(mockService);
         setupGoodAnswerToUpdate("hi!");

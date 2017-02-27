@@ -4,9 +4,14 @@ import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.Result;
 import com.twitter.sdk.android.core.TwitterException;
 
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.mockito.Mockito.verify;
@@ -14,11 +19,15 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Pierrejean on 04/10/2015.
  */
-@RunWith(MockitoJUnitRunner.class)
 public class DelegatingCallbackTest {
+
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
 
     @Mock
     private Callback<String> mockDelegate;
+    @InjectMocks
+    private DelegatingCallback<String> tested;
 
     @Test(expected = NullPointerException.class)
     public void test_NullDelegate_Throws() {
@@ -28,7 +37,6 @@ public class DelegatingCallbackTest {
 
     @Test
     public void test_Success_PassedOn() {
-        final DelegatingCallback<String> tested = new DelegatingCallback<>(mockDelegate);
         final Result<String> argument = new Result<>("Zip", null);
 
         tested.success(argument);
@@ -38,7 +46,6 @@ public class DelegatingCallbackTest {
 
     @Test
     public void test_Failure_PassedOn() {
-        final DelegatingCallback<String> tested = new DelegatingCallback<>(mockDelegate);
         final TwitterException argument = new TwitterException("zap!");
 
         tested.failure(argument);

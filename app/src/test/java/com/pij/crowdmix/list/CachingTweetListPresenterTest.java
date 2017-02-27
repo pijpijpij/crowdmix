@@ -4,8 +4,11 @@ import android.support.annotation.NonNull;
 
 import com.twitter.sdk.android.core.models.Tweet;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -16,8 +19,10 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Pierrejean on 18/10/2015.
  */
-@RunWith(MockitoJUnitRunner.class)
 public class CachingTweetListPresenterTest extends TweetListPresenterTest {
+
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
 
     @NonNull
     protected CachingTweetListPresenter createDefaultSut() {

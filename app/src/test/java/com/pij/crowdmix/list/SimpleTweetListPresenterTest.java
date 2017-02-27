@@ -2,15 +2,20 @@ package com.pij.crowdmix.list;
 
 import android.support.annotation.NonNull;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * @author Pierrejean on 18/10/2015.
  */
-@RunWith(MockitoJUnitRunner.class)
 public class SimpleTweetListPresenterTest extends TweetListPresenterTest {
+
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
 
     @NonNull
     protected SimpleTweetListPresenter createDefaultSut() {

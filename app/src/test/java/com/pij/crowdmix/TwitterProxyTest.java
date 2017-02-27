@@ -9,11 +9,12 @@ import com.twitter.sdk.android.core.models.Tweet;
 import com.twitter.sdk.android.core.services.StatusesService;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 import org.mockito.stubbing.Answer;
 
 import java.util.List;
@@ -33,8 +34,10 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Pierrejean on 04/10/2015.
  */
-@RunWith(MockitoJUnitRunner.class)
 public abstract class TwitterProxyTest {
+
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
 
     @Mock
     StatusesService mockService;
@@ -48,34 +51,6 @@ public abstract class TwitterProxyTest {
     @Before
     public void setUp() {
         tested = createDefaultSut();
-    }
-
-    @NonNull
-    abstract TwitterProxy createDefaultSut();
-
-    @SuppressWarnings("unchecked")
-    protected void setupGoodAnswerToLoad() {
-        doAnswer(new Answer<Callback<List<Tweet>>>() {
-            public Callback<List<Tweet>> answer(InvocationOnMock invocation) throws Throwable {
-                ((Callback<List<Tweet>>)invocation.getArguments()[7]).success(
-                        new Result<List<Tweet>>(mock(List.class), null));
-                return mockListCallback;
-            }
-        }).when(mockService)
-          .homeTimeline(eq(20), anyLong(), anyLong(), anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(),
-                        any(Callback.class));
-    }
-
-    @SuppressWarnings("unchecked")
-    protected void setupGoodAnswerToUpdate(String updateMessage) {
-        doAnswer(new Answer<Callback<Tweet>>() {
-            public Callback<Tweet> answer(InvocationOnMock invocation) throws Throwable {
-                ((Callback<Tweet>)invocation.getArguments()[9]).success(new Result<>(mock(Tweet.class), null));
-                return mockUpdateCallback;
-            }
-        }).when(mockService)
-          .update(eq(updateMessage), anyLong(), anyBoolean(), anyDouble(), anyDouble(), anyString(), anyBoolean(),
-                  anyBoolean(), anyString(), any(Callback.class));
     }
 
     @Test
@@ -128,5 +103,47 @@ public abstract class TwitterProxyTest {
         tested.sendUpdate("ha!", mockUpdateCallback);
 
         verify(mockUpdateCallback).failure(any(TwitterException.class));
+    }
+
+    @NonNull
+    abstract TwitterProxy createDefaultSut();
+
+    @SuppressWarnings({ "unchecked", "WeakerAccess" })
+    protected void setupGoodAnswerToLoad() {
+        doAnswer(new Answer<Callback<List<Tweet>>>() {
+            public Callback<List<Tweet>> answer(InvocationOnMock invocation) throws Throwable {
+                ((Callback<List<Tweet>>)invocation.getArguments()[7]).success(new Result<List<Tweet>>(mock(List.class),
+                                                                                                      null));
+                return mockListCallback;
+            }
+        }).when(mockService)
+          .homeTimeline(eq(20),
+                        anyLong(),
+                        anyLong(),
+                        anyBoolean(),
+                        anyBoolean(),
+                        anyBoolean(),
+                        anyBoolean(),
+                        any(Callback.class));
+    }
+
+    @SuppressWarnings({ "unchecked", "WeakerAccess" })
+    protected void setupGoodAnswerToUpdate(String updateMessage) {
+        doAnswer(new Answer<Callback<Tweet>>() {
+            public Callback<Tweet> answer(InvocationOnMock invocation) throws Throwable {
+                ((Callback<Tweet>)invocation.getArguments()[9]).success(new Result<>(mock(Tweet.class), null));
+                return mockUpdateCallback;
+            }
+        }).when(mockService)
+          .update(eq(updateMessage),
+                  anyLong(),
+                  anyBoolean(),
+                  anyDouble(),
+                  anyDouble(),
+                  anyString(),
+                  anyBoolean(),
+                  anyBoolean(),
+                  anyString(),
+                  any(Callback.class));
     }
 }

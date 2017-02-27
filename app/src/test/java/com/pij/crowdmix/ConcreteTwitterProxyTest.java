@@ -8,7 +8,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 /**
  * @author Pierrejean on 04/10/2015.
  */
-@RunWith(MockitoJUnitRunner.class)
 public class ConcreteTwitterProxyTest extends TwitterProxyTest {
 
     @NonNull
