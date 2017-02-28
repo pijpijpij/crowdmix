@@ -110,7 +110,7 @@ public class MainActivityTest {
     }
 
     @Test
-    public void test_AddATWeet_IsShownImmediatly() {
+    public void test_AddATweet_IsShownImmediately() {
         final String message = createRandomString(10);
         onTweetList().atPosition(0).check(matches(not(hasDescendant(withText(message)))));
         onView(allOf(withId(R.id.message), CoreMatchers.<View>instanceOf(EditText.class))).perform(
